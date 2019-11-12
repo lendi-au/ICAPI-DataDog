@@ -3,6 +3,7 @@ PIP := pip3
 PYTHON := python3
 IMG_TAG := latest
 IMG_REPO := tedk42/ic2datadog
+FIND := $(if $(shell which gfind),gfind,find) # needed for macos - do a `brew install findutils` to use gfind
 
 deps:
 	$(PIP) install -r requirements.txt
@@ -20,8 +21,8 @@ build-push-testing:
 	docker push $(IMG_REPO):testing
 
 lint: deps
-	$(PYTHON) -m pycodestyle . && echo "pycodestyle lint ok"
-	$(PYTHON) -m pyflakes . && echo "pyflakes lint ok"
+	$(PYTHON) -m pycodestyle . --exclude venv && echo "pycodestyle lint ok"
+	$(PYTHON) -m pyflakes `$(FIND) -path ./venv -prune -o -name '*.py' -print` && echo "pyflakes lint ok"
 
 push:
 	docker push $(IMG_REPO)
