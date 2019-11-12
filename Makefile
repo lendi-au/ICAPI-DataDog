@@ -8,27 +8,29 @@ deps:
 	$(PIP) install -r requirements.txt
 
 unittest: testing-deps
-	$(PYTHON) -m unittest test
-	rm test-data/instaclustr.json # Keep the file if you wish...
+	$(PYTHON) -m pytest tests/*.py --capture=fd -s
 
 build:
 	$(eval version = $(shell cat version))
 	docker build . -t $(IMG_REPO):$(IMG_TAG)
 	docker tag $(IMG_REPO):$(IMG_TAG) $(IMG_REPO):$(version)
 
+build-push-testing:
+	docker build . -t $(IMG_REPO):testing
+	docker push $(IMG_REPO):testing
+
+lint: deps
+	$(PYTHON) -m pycodestyle . && echo "pycodestyle lint ok"
+	$(PYTHON) -m pyflakes . && echo "pyflakes lint ok"
+
 push:
 	docker push $(IMG_REPO)
 
 coverage: testing-deps
-	coverage run test.py
-	coverage report --omit '/usr/local/lib/*' --skip-covered
-	coverage html
-	rm test-data/instaclustr.json # Keep the file if you wish...
-	open htmlcov/ic2datadog_py.html
+	pytest --cov=. tests/*.py --capture=fd -s
 
-testing-deps:
-	$(PIP) install -r requirements.txt
-	$(PIP) install -r testing-requirements.txt
+testing-deps: deps
+	$(PIP) install -r tests/testing-requirements.txt
 
 version:
 	$(PIP) install semver
@@ -37,4 +39,4 @@ version:
 	git tag $(version)
 	git push --tags
 
-.PHONY: unittest deps build push testing-deps
+.PHONY: unittest deps build push build-push-testing testing-deps
