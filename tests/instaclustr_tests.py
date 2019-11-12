@@ -106,7 +106,7 @@ kt::instaclustr-sla::messagesInPerTopic,kt::sf-funding-position-event-out::messa
     regex_pattern = re.compile('instaclustr-.*')
     topic_list = 'kt::{0}::messagesInPerTopic,kt::{0}::bytesOutPerTopic,kt::{0}::bytesInPerTopic,\
 kt::{0}::fetchMessageConversionsPerTopic,kt::{0}::produceMessageConversionsPerTopic'
-    response = instaclustr.getInstaclustrTopics('fake_clustr', regex_pattern=regex_pattern, ic_topic_list=topic_list, dumpFile=True, auth=ic_auth)
+    response = instaclustr.getInstaclustrTopics('fake_clustr', regex_pattern=regex_pattern, ic_topic_list=topic_list, dumpFile=False, auth=ic_auth)
     assert response == 'kt::instaclustr-sla::messagesInPerTopic,kt::instaclustr-sla::bytesOutPerTopic,kt::instaclustr-sla::bytesInPerTopic,\
 kt::instaclustr-sla::fetchMessageConversionsPerTopic,kt::instaclustr-sla::produceMessageConversionsPerTopic'
     assert requests_mock.call_count == 2
