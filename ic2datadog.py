@@ -7,7 +7,7 @@ import os, signal, sys, argparse
 import re, time
 
 # My custom imports
-from instaclustr.instaclustr import getInstaclustrMetrics, getInstaclustrTopics, getInstaclustrConsumerGroups
+from instaclustr.instaclustr import getInstaclustrMetrics, getInstaclustrTopics
 from instaclustr.helper import splitMetricsList
 from localdatadog.datadog import shipToDataDog
 
@@ -62,13 +62,13 @@ def ic_fetch_topics(regex, auth):
     return (ic_metrics_list + ',' + topic_list).split(',')
 
 
-def ic_fetch_consumer_groups(regex, auth):
-    logger.info('Consumer group regex set. Will get consumer groups that match')
-    regex_pattern = re.compile(regex)
-    cg_list = getInstaclustrConsumerGroups(ic_cluster_id, regex_pattern,
-                                           auth["ic_user_name"], auth["ic_api_key"], dump=True,)
-    logger.debug(cg_list)
-    return cg_list
+# def ic_fetch_consumer_groups(regex, auth):
+#     logger.info('Consumer group regex set. Will get consumer groups that match')
+#     regex_pattern = re.compile(regex)
+#     cg_list = getInstaclustrConsumerGroups(ic_cluster_id, regex_pattern,
+#                                            auth["ic_user_name"], auth["ic_api_key"], dump=True,)
+#     logger.debug(cg_list)
+#     return cg_list
 
 
 async def main():
