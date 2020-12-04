@@ -3,7 +3,6 @@ from localdatadog import datadog, helper
 import json
 from asynctest import patch
 
-
 def test_buildtags_basic():
     # some test data from instaclustr
     test_data = [
