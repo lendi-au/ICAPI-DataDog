@@ -11,11 +11,11 @@ output_dir.strip("/")
 
 
 # split the metrics list into groups size n
-def splitMetricsList(l, n):
+def splitMetricsList(list_object, size):
     # For item i in a range that is a length of l,
-    for i in range(0, len(l), n):
+    for i in range(0, len(list_object), size):
         # Create an index range for l of n items:
-        yield l[i:i + n]
+        yield list_object[i:i + size]
 
 
 # dump will async output an object to a file - always dumps to test-data directory.

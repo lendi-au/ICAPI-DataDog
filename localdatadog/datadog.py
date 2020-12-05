@@ -34,18 +34,17 @@ def shipToDataDog(ic_cluster_id: str, dd_metric_prefix: str, ic_tags=[], metrics
                 logger.debug(metric)
                 logger.debug(dd_metric_name)
                 send_list.append({'metric': dd_metric_name,
-                                'points': [(time_val, float(metric["values"][0]["value"]))],
-                                'tags': ic_tags + tag_list + topic_tag + consumer_group_tag + client_id_tag})
+                                  'points': [(time_val, float(metric["values"][0]["value"]))],
+                                  'tags': ic_tags + tag_list + topic_tag + consumer_group_tag + client_id_tag})
             except IndexError:
                 # No time component to the metric: kafka broker state metric edge case.
                 logger.debug(metric)
                 logger.debug(dd_metric_name)
                 time_val = int(time.time())
                 send_list.append({'metric': dd_metric_name,
-                                'points': [(time_val, float(metric["unit"]))],
-                                'tags': ic_tags + tag_list + topic_tag + consumer_group_tag + client_id_tag})
+                                  'points': [(time_val, float(metric["unit"]))],
+                                  'tags': ic_tags + tag_list + topic_tag + consumer_group_tag + client_id_tag})
                 pass
-            
 
     # Sends metrics per node as per tagging rules.
     if (send_list):
