@@ -39,6 +39,9 @@ def sync_dump(contents, filename='output.json'):
     try:
         logger.info('Dumping output to file {0}'.format(output))
         with open(output, 'w') as outfile:
-            json.dump(json.loads(contents), outfile)
+            if (isinstance(contents, list)):
+                json.dump(contents, outfile)
+            else:
+                json.dump(json.loads(contents), outfile)
     except Exception as e:
         logger.error('Could not dump output to file' + str(e))
