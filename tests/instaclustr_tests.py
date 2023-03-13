@@ -1,6 +1,7 @@
+import unittest
+from unittest.mock import MagicMock
 from instaclustr import instaclustr, helper
 import pytest, re, json
-from asynctest import patch, MagicMock
 
 
 def test_splitMetricsList_one():
@@ -35,7 +36,7 @@ async def async_response(input):
 
 
 async def test_getInstaclustrMetrics_basic():
-    with patch('aiohttp.ClientSession.get') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
         ## Successful invocation of Instaclustr API
         mocked_get.return_value.__aenter__.side_effect = [
             MagicMock(status=200, headers={'Content-Type': "application/json"}, text=(lambda: async_response(['hello'])))
@@ -54,7 +55,7 @@ async def test_getInstaclustrMetrics_basic():
 
 
 async def test_getInstaclustrMetrics_bad_requests(capfd):
-    with patch('aiohttp.ClientSession.get') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
         ## Bad request - HTTP Status code
         code, content_type = 400, 'application/json'
         mocked_get.return_value.__aenter__.side_effect = [
@@ -117,7 +118,7 @@ async def test_getInstaclustrConsumerGroups_basic(requests_mock):
     payload = '["KafkaConsumer-1", "KafkaConsumer-2", "KafkaConsumer-3", "group-10", "group-20"]'.encode('ascii')
     headers = {'Content-Type': 'application/json'}
     regex_pattern = re.compile('.*')
-    with patch('instaclustr.helper.sync_dump') as mock_dump:
+    with unittest.IsolatedAsyncioTestCase('instaclustr.helper.sync_dump') as mock_dump:
         mock_dump.return_value = True
         requests_mock.get("https://api.instaclustr.com/monitoring/v1/clusters/fake_clustr/kafka/consumerGroups", headers=headers, content=payload)
         response = instaclustr.getInstaclustrConsumerGroups(cluster_id='fake_clustr', regex_pattern=regex_pattern, auth=ic_auth, dump_file=True)
@@ -160,7 +161,7 @@ async def test_getInstaclustrConsumerGroupTopics_basic_topics(requests_mock):
 
 
 async def test_getInstaclustrConsumerGroupMetrics_basic(capfd):
-    with patch('aiohttp.ClientSession.get') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
         ## Bad request - HTTP Status code
         code, content_type = 400, 'application/json'
         mocked_get.return_value.__aenter__.side_effect = [
@@ -191,7 +192,7 @@ HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
 
 
 async def test_getInstaclustrConsumerGroupClientMetrics_basic(capfd):
-    with patch('aiohttp.ClientSession.get') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
         ## Bad request - HTTP Status code
         code, content_type = 400, 'application/json'
         mocked_get.return_value.__aenter__.side_effect = [

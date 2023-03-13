@@ -1,7 +1,7 @@
+import unittest
 from localdatadog import datadog, helper
 # from datadog import api
 import json
-from asynctest import patch
 
 
 def test_buildtags_basic():
@@ -58,7 +58,7 @@ def test_buildtags_basic():
 
 
 async def test_shipToDataDog_basic(capfd):
-    with patch('datadog.api.Metric.send') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('datadog.api.Metric.send') as mocked_get:
         response = await datadog.shipToDataDog('yes', 'on')
         assert mocked_get.call_count == 0  # ship method isn't called
         assert response is None
@@ -188,7 +188,7 @@ async def test_shipToDataDog_basic(capfd):
 
 
 async def test_shipToDataDog_complex(capfd):
-    with patch('datadog.api.Metric.send') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('datadog.api.Metric.send') as mocked_get:
         # Simple metrics test - DD Response == 'ok
         metrics = [
             {
@@ -295,7 +295,7 @@ async def test_shipToDataDog_complex(capfd):
 
 
 async def test_shipToDataDog_topics(capfd):
-    with patch('datadog.api.Metric.send') as mocked_get:
+    with unittest.IsolatedAsyncioTestCase('datadog.api.Metric.send') as mocked_get:
         # Simple metrics test - DD Response == 'ok
         metrics = [
             {
