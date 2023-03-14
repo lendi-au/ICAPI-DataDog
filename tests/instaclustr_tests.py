@@ -1,5 +1,6 @@
-import unittest
 from unittest.mock import MagicMock
+
+import aiohttp
 from instaclustr import instaclustr, helper
 import pytest, re, json
 
@@ -36,51 +37,53 @@ async def async_response(input):
 
 
 async def test_getInstaclustrMetrics_basic():
-    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
-        ## Successful invocation of Instaclustr API
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=200, headers={'Content-Type': "application/json"}, text=(lambda: async_response(['hello'])))
-        ]
-        response = await instaclustr.getInstaclustrMetrics(
-            'dummy_cluster_id', ['list', 'of', 'metrics'],
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        mocked_get.assert_called_once()
-        assert response == ['hello']
+    mock = aiohttp.ClientSession
+    mock.get = MagicMock()
+    ## Successful invocation of Instaclustr API
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=200, headers={'Content-Type': "application/json"}, text=(lambda: async_response(['hello'])))
+    ]
+    response = await instaclustr.getInstaclustrMetrics(
+        'dummy_cluster_id', ['list', 'of', 'metrics'],
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    mock.get.assert_called_once()
+    assert response == ['hello']
 
-        ## Bad auth object passed in
-        with pytest.raises(Exception) as e:
-            response = await instaclustr.getInstaclustrMetrics('dummy_cluster_id', {"name": 'user', "password": 'key'})
-        mocked_get.assert_called_once()  # Call count remains the same for mock object
-        assert 'None is not allowed as login value' in str(e.value)
+    ## Bad auth object passed in
+    with pytest.raises(Exception) as e:
+        response = await instaclustr.getInstaclustrMetrics('dummy_cluster_id', {"name": 'user', "password": 'key'})
+    mock.get.assert_called_once()  # Call count remains the same for mock object
+    assert 'None is not allowed as login value' in str(e.value)
 
 
 async def test_getInstaclustrMetrics_bad_requests(capfd):
-    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
-        ## Bad request - HTTP Status code
-        code, content_type = 400, 'application/json'
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=code, headers={'Content-Type': content_type})
-        ]
-        response = await instaclustr.getInstaclustrMetrics(
-            'dummy_cluster_id', ['list', 'of', 'metrics'],
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        captured = capfd.readouterr()
-        assert mocked_get.call_count == 1  # Call count increments for mock object
-        assert response is None
-        assert 'Missing metrics data from instaclustr - HTTP response code: {0}; HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
+    mock = aiohttp.ClientSession
+    mock.get = MagicMock()
+    ## Bad request - HTTP Status code
+    code, content_type = 400, 'application/json'
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=code, headers={'Content-Type': content_type})
+    ]
+    response = await instaclustr.getInstaclustrMetrics(
+        'dummy_cluster_id', ['list', 'of', 'metrics'],
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    captured = capfd.readouterr()
+    assert mock.get.call_count == 1  # Call count increments for mock object
+    assert response is None
+    assert 'Missing metrics data from instaclustr - HTTP response code: {0}; HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
 
-        ## Bad request - Content-Type
-        code, content_type = 200, 'text/html'
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=code, headers={'Content-Type': content_type})
-        ]
-        response = await instaclustr.getInstaclustrMetrics(
-            'dummy_cluster_id', ['list', 'of', 'metrics'],
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        captured = capfd.readouterr()
-        assert mocked_get.call_count == 2  # Call count increments for mock object
-        assert response is None
-        assert 'Missing metrics data from instaclustr - HTTP response code: {0}; HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
+    ## Bad request - Content-Type
+    code, content_type = 200, 'text/html'
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=code, headers={'Content-Type': content_type})
+    ]
+    response = await instaclustr.getInstaclustrMetrics(
+        'dummy_cluster_id', ['list', 'of', 'metrics'],
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    captured = capfd.readouterr()
+    assert mock.get.call_count == 2  # Call count increments for mock object
+    assert response is None
+    assert 'Missing metrics data from instaclustr - HTTP response code: {0}; HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
 
 
 async def test_getInstaclustrTopics_basic(requests_mock):
@@ -118,12 +121,14 @@ async def test_getInstaclustrConsumerGroups_basic(requests_mock):
     payload = '["KafkaConsumer-1", "KafkaConsumer-2", "KafkaConsumer-3", "group-10", "group-20"]'.encode('ascii')
     headers = {'Content-Type': 'application/json'}
     regex_pattern = re.compile('.*')
-    with unittest.IsolatedAsyncioTestCase('instaclustr.helper.sync_dump') as mock_dump:
-        mock_dump.return_value = True
-        requests_mock.get("https://api.instaclustr.com/monitoring/v1/clusters/fake_clustr/kafka/consumerGroups", headers=headers, content=payload)
-        response = instaclustr.getInstaclustrConsumerGroups(cluster_id='fake_clustr', regex_pattern=regex_pattern, auth=ic_auth, dump_file=True)
-        assert mock_dump.call_count == 0  # Currently unable to mock the sync_dump function call...
-        assert response == consumer_groups
+    mock = helper
+    mock.sync_dump = MagicMock()
+    
+    mock.sync_dump.return_value = True
+    requests_mock.get("https://api.instaclustr.com/monitoring/v1/clusters/fake_clustr/kafka/consumerGroups", headers=headers, content=payload)
+    response = instaclustr.getInstaclustrConsumerGroups(cluster_id='fake_clustr', regex_pattern=regex_pattern, auth=ic_auth, dump_file=True)
+    assert mock.sync_dump.call_count == 0  # Currently unable to mock the sync_dump function call...
+    assert response == consumer_groups
 
 
 async def test_getInstaclustrConsumerGroupTopics_basic_all(requests_mock):
@@ -161,62 +166,65 @@ async def test_getInstaclustrConsumerGroupTopics_basic_topics(requests_mock):
 
 
 async def test_getInstaclustrConsumerGroupMetrics_basic(capfd):
-    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
-        ## Bad request - HTTP Status code
-        code, content_type = 400, 'application/json'
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=code, headers={'Content-Type': content_type})
-        ]
-        response = await instaclustr.getInstaclustrConsumerGroupMetrics(
-            'dummy_cluster_id', 'consumer_group', 'topic',
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        captured = capfd.readouterr()
-        assert mocked_get.call_count == 1  # Call count increments for mock object
-        assert response is None
-        assert 'Missing consumer group metrics data from instaclustr - HTTP response code: {0}; \
+    mock = aiohttp.ClientSession
+    mock.get = MagicMock()
+
+    ## Bad request - HTTP Status code
+    code, content_type = 400, 'application/json'
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=code, headers={'Content-Type': content_type})
+    ]
+    response = await instaclustr.getInstaclustrConsumerGroupMetrics(
+        'dummy_cluster_id', 'consumer_group', 'topic',
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    captured = capfd.readouterr()
+    assert mock.get.call_count == 1  # Call count increments for mock object
+    assert response is None
+    assert 'Missing consumer group metrics data from instaclustr - HTTP response code: {0}; \
 HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
 
-        ## Bad request - Content-Type
-        code, content_type = 200, 'text/html'
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=code, headers={'Content-Type': content_type})
-        ]
-        response = await instaclustr.getInstaclustrConsumerGroupMetrics(
-            'dummy_cluster_id', 'consumer_group', 'topic',
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        captured = capfd.readouterr()
-        assert mocked_get.call_count == 2  # Call count increments for mock object
-        assert response is None
-        assert 'Missing consumer group metrics data from instaclustr - HTTP response code: {0}; \
+    ## Bad request - Content-Type
+    code, content_type = 200, 'text/html'
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=code, headers={'Content-Type': content_type})
+    ]
+    response = await instaclustr.getInstaclustrConsumerGroupMetrics(
+        'dummy_cluster_id', 'consumer_group', 'topic',
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    captured = capfd.readouterr()
+    assert mock.get.call_count == 2  # Call count increments for mock object
+    assert response is None
+    assert 'Missing consumer group metrics data from instaclustr - HTTP response code: {0}; \
 HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
 
 
 async def test_getInstaclustrConsumerGroupClientMetrics_basic(capfd):
-    with unittest.IsolatedAsyncioTestCase('aiohttp.ClientSession.get') as mocked_get:
-        ## Bad request - HTTP Status code
-        code, content_type = 400, 'application/json'
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=code, headers={'Content-Type': content_type})
-        ]
-        response = await instaclustr.getInstaclustrConsumerGroupClientMetrics(
-            'dummy_cluster_id', 'consumer_group', 'topic',
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        captured = capfd.readouterr()
-        assert mocked_get.call_count == 1  # Call count increments for mock object
-        assert response is None
-        assert 'Missing consumer group client metrics data from instaclustr - HTTP response code: {0}; \
+    mock = aiohttp.ClientSession
+    mock.get = MagicMock()
+    ## Bad request - HTTP Status code
+    code, content_type = 400, 'application/json'
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=code, headers={'Content-Type': content_type})
+    ]
+    response = await instaclustr.getInstaclustrConsumerGroupClientMetrics(
+        'dummy_cluster_id', 'consumer_group', 'topic',
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    captured = capfd.readouterr()
+    assert mock.get.call_count == 1  # Call count increments for mock object
+    assert response is None
+    assert 'Missing consumer group client metrics data from instaclustr - HTTP response code: {0}; \
 HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out
 
-        ## Bad request - Content-Type
-        code, content_type = 200, 'text/html'
-        mocked_get.return_value.__aenter__.side_effect = [
-            MagicMock(status=code, headers={'Content-Type': content_type})
-        ]
-        response = await instaclustr.getInstaclustrConsumerGroupClientMetrics(
-            'dummy_cluster_id', 'consumer_group', 'topic',
-            {"ic_user_name": 'user', "ic_api_key": 'key'})
-        captured = capfd.readouterr()
-        assert mocked_get.call_count == 2  # Call count increments for mock object
-        assert response is None
-        assert 'Missing consumer group client metrics data from instaclustr - HTTP response code: {0}; \
+    ## Bad request - Content-Type
+    code, content_type = 200, 'text/html'
+    mock.get.return_value.__aenter__.side_effect = [
+        MagicMock(status=code, headers={'Content-Type': content_type})
+    ]
+    response = await instaclustr.getInstaclustrConsumerGroupClientMetrics(
+        'dummy_cluster_id', 'consumer_group', 'topic',
+        {"ic_user_name": 'user', "ic_api_key": 'key'})
+    captured = capfd.readouterr()
+    assert mock.get.call_count == 2  # Call count increments for mock object
+    assert response is None
+    assert 'Missing consumer group client metrics data from instaclustr - HTTP response code: {0}; \
 HTTP Header Content-Type: {1}'.format(code, content_type) in captured.out

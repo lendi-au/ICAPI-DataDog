@@ -1,7 +1,5 @@
-import unittest
 from unittest.mock import MagicMock
 
-import pytest
 from localdatadog import datadog, helper
 # from datadog import api
 import json
