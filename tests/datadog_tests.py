@@ -57,6 +57,7 @@ def test_buildtags_basic():
     assert 'ic_data_centre_name:AP_SOUTHEAST_2' in tag_list
     assert 'ic_cluster_id:test-cluster' in tag_list
 
+
 async def test_shipToDataDog_basic(capfd):
     mock = datadog.api.Metric
     mock.send = MagicMock()
@@ -186,6 +187,7 @@ async def test_shipToDataDog_basic(capfd):
         ])
     assert 'Error sending metrics to DataDog: ' in captured.out
     assert response is None
+
 
 async def test_shipToDataDog_complex(capfd):
     mock = datadog.api.Metric

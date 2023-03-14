@@ -123,7 +123,6 @@ async def test_getInstaclustrConsumerGroups_basic(requests_mock):
     regex_pattern = re.compile('.*')
     mock = helper
     mock.sync_dump = MagicMock()
-    
     mock.sync_dump.return_value = True
     requests_mock.get("https://api.instaclustr.com/monitoring/v1/clusters/fake_clustr/kafka/consumerGroups", headers=headers, content=payload)
     response = instaclustr.getInstaclustrConsumerGroups(cluster_id='fake_clustr', regex_pattern=regex_pattern, auth=ic_auth, dump_file=True)
