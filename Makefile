@@ -4,6 +4,7 @@ PYTHON := python3
 IMG_TAG := latest
 IMG_REPO := tedk42/ic2datadog
 FIND := $(if $(shell which gfind),gfind,find) # needed for macos - do a `brew install findutils` to use gfind
+VERSION := $(eval version = $(shell cat version))
 
 deps:
 	$(PIP) install -r requirements.txt
@@ -12,9 +13,8 @@ unittest: testing-deps
 	$(PYTHON) -m pytest tests/*.py --capture=fd -s
 
 build:
-	$(eval version = $(shell cat version))
 	docker build . -t $(IMG_REPO):$(IMG_TAG)
-	docker tag $(IMG_REPO):$(IMG_TAG) $(IMG_REPO):$(version)
+	docker tag $(IMG_REPO):$(IMG_TAG) $(IMG_REPO):$(VERSION)
 
 build-push-testing:
 	docker build . -t $(IMG_REPO):testing
@@ -25,7 +25,7 @@ lint: deps
 	$(PYTHON) -m pyflakes `$(FIND) -path ./venv -prune -o -name '*.py' -print` && echo "pyflakes lint ok"
 
 push:
-	docker push $(IMG_REPO)
+	docker push $(IMG_REPO) --all-tags
 
 coverage: testing-deps
 	pytest --cov=. tests/*.py --capture=fd -s
