@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.11"
+
+[packages]
+datadog = "~=0.45"
+json-logging = "~=1.2"
+requests = "~=2.31"
+aiohttp = "~=3.8"
+aiofiles = "~=0.6"
+asgiref = "~=3.3"
+cachetools = "~=4.1"
+
+[dev-packages]
+pyflakes = "~=3.0"
+pycodestyle = "~=2.6.0"

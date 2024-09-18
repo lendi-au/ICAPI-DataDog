@@ -11,27 +11,29 @@ Monitoring REST API to DataDog. It is specific to Apache Kafka monitoring.
 
 [DataDog implementation docs](./localdatadog/README.md)
 
-## Usage
+## Dependencies
 
-Built and tested on `Python 3.8.6` and `Python 3.9.0`.
+Install dependencies via pip3 `pip3 install -r requirements.txt.lock`
 
-### Dependencies
+Update all dependencies to the latest non-major versions with `./update-dependencies.sh`.
 
-Install dependencies via pip3 `pip3 install -r requirements.txt`
+Update individual dependencies by modifying `Pipfile` and running `./update-dependencies.sh`.
 
-### Environment
+## Environment
 
 I use _dotenv_, check out the `.env-sample` file for the list of environment
 variables needed to fetch metrics from Instaclustr and ship them to DataDog.
 
-### Run
+## Run
 
 `python3 ic2datadog.py`.
 
 ## Docker Image Build
 
 SemVer is used to increment the builds.
+
 Images are [pushed to Docker Hub](https://hub.docker.com/r/tedk42/ic2datadog).
+
 The tags in DockerHub will match the Releases of this app.
 
 ## References

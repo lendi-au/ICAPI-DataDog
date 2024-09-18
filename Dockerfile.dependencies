@@ -1,0 +1,8 @@
+FROM python:3.11-slim-bookworm
+USER root
+RUN apt update && ACCEPT_EULA=Y apt upgrade -y && apt install -y build-essential
+# install wheel et al. first else wheels won't be used
+RUN python3 -m pip install wheel setuptools[core] virtualenv packaging --upgrade
+RUN python3 -m pip install pipenv --upgrade
+COPY Pipfile bump.sh .
+CMD ./bump.sh

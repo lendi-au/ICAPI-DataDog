@@ -10,8 +10,8 @@ chown -R appuser:appgroup /usr/app
 USER appuser
 
 # Dependency setup
-ADD requirements.txt .
-RUN pip install -r requirements.txt --user
+COPY requirements.txt.lock .
+RUN pip install -r requirements.txt.lock --user
 
 # App setup
 ENV DD_API_KEY DD_APP_KEY
