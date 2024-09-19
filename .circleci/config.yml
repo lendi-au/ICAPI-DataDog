@@ -16,8 +16,6 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
             make deps
 
       # run tests!
@@ -28,7 +26,6 @@ jobs:
       - run:
           name: run tests
           command: |
-            . venv/bin/activate
             make lint
             make unittest
 
@@ -49,8 +46,6 @@ jobs:
       - run:
           name: SemVer the build
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
             make version
       - run:
           name: Build Docker image and tag with version

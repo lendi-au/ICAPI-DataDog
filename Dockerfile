@@ -1,7 +1,10 @@
-FROM python:3.11.4-alpine3.18
+FROM python:3.11-alpine3.20
 
-# Need python3 dependencies
-RUN apk add build-base --update
+RUN pip install pip wheel --upgrade --no-color --disable-pip-version-check --progress-bar=off
+
+# https://scout.docker.com/vulnerabilities/id/CVE-2024-6345
+RUN pip install "setuptools>=70.0" --no-color --disable-pip-version-check --progress-bar=off
+
 # Generic container setup
 WORKDIR /usr/app
 RUN addgroup -g 1001 -S appgroup && \
@@ -14,7 +17,7 @@ COPY requirements.txt.lock .
 RUN pip install -r requirements.txt.lock --user
 
 # App setup
-ENV DD_API_KEY DD_APP_KEY
+ENV DD_API_KEY=DD_APP_KEY
 COPY instaclustr instaclustr
 COPY localdatadog localdatadog
 ADD ic2datadog.py .

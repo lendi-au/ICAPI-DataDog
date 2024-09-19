@@ -7,3 +7,4 @@ version
 .pytest_cache
 **/*,cover
 output/
+venv/
