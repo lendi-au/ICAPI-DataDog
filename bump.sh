@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Run inside Docker container as it assumes many things.
 set -ex
 pipenv update --dev

@@ -1,4 +1,4 @@
-# file generated 2024-09-19T01:56:00Z - see make update-deps
+# file generated 2024-09-20T00:52:00Z - see make update-deps
 aiofiles==0.8.0
 aiohappyeyeballs==2.4.0
 aiohttp==3.10.5
