@@ -1,0 +1,8 @@
+FROM python:3.11-alpine3.20
+USER root
+# install wheel et al. first else wheels won't be used
+RUN pip install pip --upgrade
+RUN pip install wheel setuptools[core] virtualenv packaging --upgrade
+RUN pip install pipenv --upgrade
+COPY Pipfile bump.sh .
+CMD ./bump.sh
