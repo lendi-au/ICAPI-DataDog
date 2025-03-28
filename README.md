@@ -1,11 +1,13 @@
 # ICAPI-DataDog
 
+DEPRECATED.
+
+Instaclustr/NetApp has introduced rate limiting changes to their /v1/monitoring
+API endpoint which make it hard to sync metrics from them in this way.
+
+Instead, the prometheus endpoint is preferred to pull / ingest metrics from Instaclustr.
+
 Forked from the Instaclustr repo.
-
-[![CircleCI](https://circleci.com/gh/lendi-au/ICAPI-DataDog/tree/master.svg?style=svg)](https://circleci.com/gh/lendi-au/ICAPI-DataDog/tree/master)
-
-Provides a simple integration script to push data from the Instaclustr
-Monitoring REST API to DataDog. It is specific to Apache Kafka monitoring.
 
 [Instaclustr implementation docs](./instaclustr/README.md)
 
